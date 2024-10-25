@@ -7,7 +7,7 @@ client/yarn-error.log*
 client/pnpm-debug.log*
 client/lerna-debug.log*
 
-# Ignore node_modules in client folder
+# Ignore node_modules in client folder and server
 client/node_modules/
 server/node_modules/
 
