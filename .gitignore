@@ -8,6 +8,7 @@ client/pnpm-debug.log*
 client/lerna-debug.log*
 
 # Ignore node_modules in client folder and server
+node_modules
 client/node_modules/
 server/node_modules/
 
