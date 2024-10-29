@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import MapMidpointFinder from "./components/MapMidpointFinder";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1 className='text-blue-600'>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+// If you need to type the environment variable
+declare global {
+  interface Window {
+    GOOGLE_MAPS_API_KEY?: string;
+  }
 }
 
-export default App
+const App: React.FC = () => {
+  // You can store your API key in an environment variable
+  // Make sure to add VITE_GOOGLE_MAPS_API_KEY to your .env file
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+   
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <h1 className="text-xl font-semibold text-gray-900">Hub Spotter</h1>
+        </div>
+      </header>
+
+      <main className="py-6">
+        <MapMidpointFinder apiKey={apiKey} />
+      </main>
+    </div>
+  );
+};
+
+export default App;
