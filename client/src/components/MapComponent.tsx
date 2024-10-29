@@ -34,7 +34,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   return (
     <div style={containerStyle}>
-      console.log("API Key:", apiKey); // For debugging
+      
       <LoadScript 
         googleMapsApiKey={apiKey}
         loadingElement={
