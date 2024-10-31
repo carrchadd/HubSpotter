@@ -12,7 +12,12 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
-  		colors: {}
+  		colors: {},
+      fontFamily: {
+        raleway: ['Raleway'],
+        nunito: ['Nunito Sans'],
+        librefranklin: ['Libre Franklin']
+      }
   	}
   },
   plugins: [require("tailwindcss-animate")],
