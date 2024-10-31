@@ -26,6 +26,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     shopping: false,
     kidFriendly: false,
   });
+  const [places, setPlaces] = useState<google.maps.places.PlaceResult[]>([]);
 
   const handleAddAddress = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -50,9 +51,10 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     if (addresses.length === 0) {
       setMarkers([]);
       setCenter(undefined);
+      setPlaces([]);
       return;
     }
-  
+
     const geocodeAddresses = async () => {
       try {
         const geocoder = new google.maps.Geocoder();
@@ -68,20 +70,20 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
               });
             })
         );
-  
+
         const results = await Promise.all(geocodePromises);
         const coordinates = results.map((res) => {
           const location = res[0].geometry.location;
           return { lat: location.lat(), lng: location.lng() };
         });
-  
+
         console.log('Geocoded coordinates:', coordinates);
-  
+
         setMarkers(coordinates);
-  
+
         if (addresses.length >= 2) {
           const directionsService = new google.maps.DirectionsService();
-  
+
           directionsService.route(
             {
               origin: addresses[0],
@@ -94,10 +96,10 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
                 const path = google.maps.geometry.encoding.decodePath(
                   route.overview_polyline
                 );
-  
+
                 let totalDistance = 0;
                 const cumulativeDistances = [0];
-  
+
                 for (let i = 1; i < path.length; i++) {
                   const segmentDistance =
                     google.maps.geometry.spherical.computeDistanceBetween(
@@ -107,30 +109,30 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
                   totalDistance += segmentDistance;
                   cumulativeDistances.push(totalDistance);
                 }
-  
+
                 const halfDistance = totalDistance / 2;
-  
+
                 let index = cumulativeDistances.findIndex(
                   (dist) => dist >= halfDistance
                 );
                 if (index === -1) {
                   index = cumulativeDistances.length - 1;
                 }
-  
+
                 const prevDistance = cumulativeDistances[index - 1];
                 const nextDistance = cumulativeDistances[index];
                 const ratio =
                   (halfDistance - prevDistance) / (nextDistance - prevDistance);
-  
+
                 const lat =
                   path[index - 1].lat() +
                   ratio * (path[index].lat() - path[index - 1].lat());
                 const lng =
                   path[index - 1].lng() +
                   ratio * (path[index].lng() - path[index - 1].lng());
-  
+
                 const midpoint = { lat, lng };
-  
+
                 setCenter(midpoint);
               } else {
                 console.error('Directions request failed due to ' + status);
@@ -140,22 +142,69 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
         } else {
           // If only one address, do not set center
           setCenter(undefined);
+          setPlaces([]);
         }
       } catch (error) {
         console.error('Error during geocoding:', error);
       }
     };
-  
+
     const loader = new Loader({
       apiKey: apiKey,
       version: 'weekly',
       libraries: ['places', 'geometry'],
     });
-  
+
     loader.load().then(() => {
       geocodeAddresses();
     });
   }, [addresses, apiKey]);
+
+  // Use effect to search for places when center or radius or filters change
+  useEffect(() => {
+    if (!center) {
+      setPlaces([]);
+      return;
+    }
+
+    const fetchPlaces = () => {
+      const service = new google.maps.places.PlacesService(
+        document.createElement('div')
+      );
+
+      // Determine the types to search for based on filters
+      const types: string[] = [];
+
+      if (filters.restaurants) types.push('restaurant');
+      if (filters.entertainment) types.push('movie_theater', 'night_club');
+      if (filters.parks) types.push('park');
+      if (filters.shopping) types.push('shopping_mall');
+      if (filters.kidFriendly) types.push('amusement_park', 'zoo');
+
+      if (types.length === 0) {
+        // If no filters are selected, clear places
+        setPlaces([]);
+        return;
+      }
+
+      const request: google.maps.places.PlaceSearchRequest = {
+        location: center,
+        radius: radius * 1000, // Convert to meters
+        type: types as any, // Type can be a single type or an array
+      };
+
+      service.nearbySearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          setPlaces(results);
+        } else {
+          console.error('Places search failed due to ' + status);
+          setPlaces([]);
+        }
+      });
+    };
+
+    fetchPlaces();
+  }, [center, radius, filters]);
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -166,6 +215,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           markers={markers}
           center={center}
           radius={radius}
+          places={places}
         />
       </div>
 
@@ -233,7 +283,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
               </div>
 
               <div>
-                <h4 className="text-sm font-medium mb-2">Radius</h4>
+                <h4 className="text-sm font-medium mb-2">Radius (km)</h4>
                 <Slider
                   value={[radius]}
                   onValueChange={(value) => setRadius(value[0])}
