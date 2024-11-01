@@ -27,3 +27,7 @@ client/*.ntvs*
 client/*.njsproj
 client/*.sln
 client/*.sw?
+
+.env
+.env.local
+.env.*.local
