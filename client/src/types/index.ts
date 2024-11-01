@@ -8,13 +8,13 @@ export interface Coordinates {
     coordinates?: Coordinates;
   }
   
-  export interface Filters {
-    restaurants: boolean;
-    entertainment: boolean;
-    parks: boolean;
-    shopping: boolean;
-    kidFriendly: boolean;
-  }
+export interface Filters {
+  restaurants: boolean;
+  entertainment: boolean;
+  parks: boolean;
+  shopping: boolean;
+  kidFriendly: boolean;
+}
   
   export interface MapSettings {
     zoom: number;
