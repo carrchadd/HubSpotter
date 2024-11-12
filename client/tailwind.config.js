@@ -12,7 +12,14 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
-  		colors: {},
+  		colors: {
+        textColor: '#c5cbd1',
+        background: '#050e15',
+        primary: '#e2e5e8',
+        secondary: '#BFD9C0',
+        accent: '#1b584c',
+
+      },
       fontFamily: {
         raleway: ['Raleway'],
         nunito: ['Nunito Sans'],
