@@ -1,15 +1,11 @@
 import './App.css'
-import Navbar from './components/Navbar'
-import HeroCover from './components/HeroCover'
-import Infographic from './components/Infographic'
+import LandingPage from './components/LandingPage'
 
 function App() {
 
   return (
     <>
-    <Navbar />
-    <HeroCover />
-    <Infographic />
+    <LandingPage />
     </>
   )
 }

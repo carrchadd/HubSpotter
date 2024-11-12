@@ -8,7 +8,7 @@ const Navbar = () => {
           <div className='flex items-center'>
               <img src={HubSpotterLogo} alt="logo" className='h-32' />
           </div>
-          <Button className='font-bold text-sm rounded-[8px] px-6'>Log In</Button>
+          <Button className='font-bold text-sm rounded-[8px] px-8 bg-accent'>Log In</Button>
       </div>
     </div>
   )
