@@ -1,6 +1,7 @@
 import { Button } from './ui/button'
 import { FaGithubSquare } from "react-icons/fa";
 import { IoIosMail } from "react-icons/io";
+import { NavLink } from "react-router-dom";
 
 
 
@@ -16,7 +17,9 @@ const Footer = () => {
                         <p className='font-nunito font-semibold pt-2'>Enjoy full access to all our features with a single account.</p>
                     </div>
                     <div className='lg:col-span-1 flex items-center justify-center'>
-                        <Button className='bg-accent px-24 py-6 rounded-[6px] font-nunito'>Get Started</Button>
+                        <NavLink to={"/login"}>
+                            <Button className='bg-accent px-24 py-6 rounded-[5px] font-nunito'>Get Started</Button>
+                        </NavLink>
                     </div>
                 </div>
             </div>
@@ -25,6 +28,10 @@ const Footer = () => {
                 <div className='mx-auto my-2 flex md:w-[50%] justify-center items-center gap-10'>
                     <a href="https://github.com/carrchadd/HubSpotter"><FaGithubSquare size={30}/></a>
                     <a href="mailto:ccarreon@charlotte.edu?subject=HubSpotter%20Customer%20Contact"><IoIosMail size={32}/></a>
+                </div>
+                <div className='flex md:w-[50%] mx-auto justify-center items-center gap-10 mt-10 font-nunito lg:text-xl'>
+                    <NavLink to={"/about"} >About</NavLink>
+                    <NavLink to={"/contact"}>Contact</NavLink>
                 </div>
             </div>
         </div>
