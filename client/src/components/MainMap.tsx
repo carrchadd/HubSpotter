@@ -2,6 +2,7 @@ import React from 'react';
 import MapMidpointFinder from "./MapMidpointFinder";
 
 
+
 // If you need to type the environment variable
 declare global {
   interface Window {
@@ -13,7 +14,7 @@ const App: React.FC = () => {
   // You can store your API key in an environment variable
   // Make sure to add VITE_GOOGLE_MAPS_API_KEY to your .env file
   //const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const apiKey ='AIzaSyDp_835v2bXPX-9BA1BIE0luJIkKQu1-8U'
+  const apiKey ='AIzaSyAl-bOfBLQ8v1rsfa6JHT5I48CwQh62_P8'
   console.log("import mode:", import.meta.env.MODE)
   console.log("Environment:", import.meta.env);
   console.log("Google Maps API Key:", apiKey);

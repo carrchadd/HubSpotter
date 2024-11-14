@@ -11,6 +11,7 @@ import { Loader } from '@googlemaps/js-api-loader';
 
 interface MapMidpointFinderProps {
   apiKey: string;
+  
 }
 
 const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
@@ -77,8 +78,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           return { lat: location.lat(), lng: location.lng() };
         });
 
-        console.log('Geocoded coordinates:', coordinates);
-
         setMarkers(coordinates);
 
         if (addresses.length >= 2) {
@@ -140,7 +139,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
             }
           );
         } else {
-          // If only one address, do not set center
           setCenter(undefined);
           setPlaces([]);
         }
@@ -148,6 +146,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
         console.error('Error during geocoding:', error);
       }
     };
+ 
 
     const loader = new Loader({
       apiKey: apiKey,
@@ -160,7 +159,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     });
   }, [addresses, apiKey]);
 
-  // Use effect to search for places when center or radius or filters change
   useEffect(() => {
     if (!center) {
       setPlaces([]);
@@ -168,36 +166,56 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     }
 
     const fetchPlaces = () => {
-      const service = new google.maps.places.PlacesService(
-        document.createElement('div')
-      );
-
-      // Determine the types to search for based on filters
+      const service = new google.maps.places.PlacesService(document.createElement('div'));
+    
       const types: string[] = [];
-
       if (filters.restaurants) types.push('restaurant');
       if (filters.entertainment) types.push('movie_theater', 'night_club');
       if (filters.parks) types.push('park');
       if (filters.shopping) types.push('shopping_mall');
       if (filters.kidFriendly) types.push('amusement_park', 'zoo');
-
+    
       if (types.length === 0) {
-        // If no filters are selected, clear places
         setPlaces([]);
         return;
       }
-
+    
       const request: google.maps.places.PlaceSearchRequest = {
         location: center,
-        radius: radius * 1000, // Convert to meters
-        type: types as any, // Type can be a single type or an array
+        radius: radius * 1000,
+        type: types as any,
       };
-
+    
       service.nearbySearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          setPlaces(results);
+          // Create an array to hold the enriched place details
+          const detailedPlaces: google.maps.places.PlaceResult[] = [];
+    
+          // Loop through each result and fetch detailed information
+          results.forEach((place) => {
+            if (place.place_id) {
+              service.getDetails(
+                {
+                  placeId: place.place_id,
+                  fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'geometry', 'rating', 'icon', 'photos'],
+                },
+                (details, status) => {
+                  if (status === google.maps.places.PlacesServiceStatus.OK && details) {
+                    detailedPlaces.push(details);
+    
+                    // Set the detailed places only once all are retrieved
+                    if (detailedPlaces.length === results.length) {
+                      setPlaces(detailedPlaces);
+                    }
+                  } else {
+                    console.error(`Failed to get place details for ${place.place_id}:`, status);
+                  }
+                }
+              );
+            }
+          });
         } else {
-          console.error('Places search failed due to ' + status);
+          console.error('Places search failed due to', status);
           setPlaces([]);
         }
       });
@@ -208,7 +226,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      {/* Map Container */}
       <div className="w-full h-[600px] mb-4 rounded-lg overflow-hidden">
         <MapComponent
           apiKey={apiKey}
@@ -220,7 +237,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Address Input Section */}
         <Card className="md:col-span-2">
           <CardContent className="p-4">
             <form onSubmit={handleAddAddress} className="mb-4">
@@ -258,30 +274,27 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           </CardContent>
         </Card>
 
-        {/* Filters Section */}
         <Card>
           <CardContent className="p-4">
             <h3 className="font-medium mb-4">Filters</h3>
-
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
-                {(
-                  Object.entries(filters) as [keyof Filters, boolean][]
-                ).map(([key, value]) => (
-                  <label key={key} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      onChange={() => handleFilterChange(key)}
-                      className="rounded"
-                    />
-                    <span className="capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                    </span>
-                  </label>
-                ))}
+                {(Object.entries(filters) as [keyof Filters, boolean][]).map(
+                  ([key, value]) => (
+                    <label key={key} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={value}
+                        onChange={() => handleFilterChange(key)}
+                        className="rounded"
+                      />
+                      <span className="capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                      </span>
+                    </label>
+                  )
+                )}
               </div>
-
               <div>
                 <h4 className="text-sm font-medium mb-2">Radius (km)</h4>
                 <Slider
@@ -296,6 +309,57 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Places List Section */}
+      {places.length > 0 && (
+  <div className="mt-8">
+    <h2 className="text-xl font-semibold mb-4">Places to Meet</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {places.map((place, index) => (
+        <div key={index} className="border p-4 rounded-lg shadow-md flex items-start">
+          {/* Left Side: Place Info */}
+          <div className="flex-grow pr-4">
+            <h3 className="text-lg font-semibold">{place.name || "No Name Available"}</h3>
+            <p>{place.formatted_address || place.vicinity || "No Address Available"}</p>
+            {place.formatted_phone_number ? (
+              <p>📞 Phone: {place.formatted_phone_number}</p>
+            ) : (
+              <p>📞 Phone: Not Available</p>
+            )}
+            {place.website ? (
+              <p>
+                🌐 Website: <a href={place.website} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }} onMouseOver={(e) => e.currentTarget.style.color = 'blue'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>{new URL(place.website).hostname}</a>
+              </p>
+            ) : (
+              <p>🌐 Website: Not Available</p>
+            )}
+            {place.rating !== undefined && <p>⭐ Rating: {place.rating}</p>}
+          </div>
+
+          {/* Right Side: Image(s) */}
+          <div className="w-1/3 flex flex-col items-center">
+            {place.icon && (
+              <img src={place.icon} alt="Place Icon" className="w-6 h-6 mb-2" />
+            )}
+            {place.photos && place.photos.length > 0 && (
+              <div className="grid gap-2">
+                {place.photos.slice(0, 3).map((photo, idx) => (
+                  <img
+                    key={idx}
+                    src={photo.getUrl({ maxWidth: 100, maxHeight: 100 })}
+                    alt={`Place ${idx + 1}`}
+                    className="w-full h-auto rounded-md"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
