@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { Coordinates } from '../types';
 
+
 interface MapComponentProps {
   apiKey: string;
   markers: Coordinates[];

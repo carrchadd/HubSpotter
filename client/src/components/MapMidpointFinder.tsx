@@ -183,7 +183,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       const request: google.maps.places.PlaceSearchRequest = {
         location: center,
         radius: radius * 1000,
-        type: types as any,
+        
       };
     
       service.nearbySearch(request, (results, status) => {
