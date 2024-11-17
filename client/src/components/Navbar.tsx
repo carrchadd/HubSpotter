@@ -11,9 +11,12 @@ const Navbar = () => {
                 <img src={HubSpotterLogo} alt="logo" className='h-32' />
               </NavLink>
           </div>
+          <div>
+        
           <NavLink to={"/login"}>
-            <Button className='font-bold text-sm rounded-[5px] px-8 bg-accent'>Log In</Button>
+            <Button className='font-bold text-sm rounded-[5px] px-8 bg-accent ml-3'>Log In</Button>
           </NavLink>
+          </div>
       </div>
     </div>
   )

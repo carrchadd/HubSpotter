@@ -64,32 +64,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       markersRef.current.push(marker);
     });
 
-    // Function to create a custom icon with a colored background circle
-    const createCustomIcon = (iconUrl: string) => {
-      const canvas = document.createElement('canvas');
-      const size = 50; // Adjust size as needed
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-
-      if (ctx) {
-        // Draw background circle
-        ctx.fillStyle = '#ffffff'; // Set the circle color (white for contrast with red background)
-        ctx.beginPath();
-        ctx.arc(size / 2, size / 2, size / 2.5, 0, Math.PI * 2); // Circle shape
-        ctx.fill();
-
-        // Draw the icon image on top
-        const image = new Image();
-        image.src = iconUrl;
-        image.onload = () => {
-          ctx.drawImage(image, size / 4, size / 4, size / 2, size / 2); // Center the icon image
-        };
-
-        return canvas.toDataURL(); // Return data URL of the custom icon
-      }
-      return iconUrl; // Fallback to original icon URL if canvas fails
-    };
+    
 
     places.forEach((place) => {
       if (place.geometry && place.geometry.location) {

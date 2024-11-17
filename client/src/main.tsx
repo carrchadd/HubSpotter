@@ -11,6 +11,9 @@ import LogIn from './components/LogIn';
 import SignUp from './components/SignUp';
 import About from './components/About';
 import User from './User';
+import MainMap from './components/MainMap';
+
+
 import { Contact } from './components/Contact';
 
 const router = createBrowserRouter([
@@ -22,6 +25,10 @@ const router = createBrowserRouter([
         path: "/",
         element: <LandingPage />
       },
+      {
+        path: "/map",
+        element: <MainMap />
+      }
     ],
   },
   {
