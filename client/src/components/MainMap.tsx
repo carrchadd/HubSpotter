@@ -12,11 +12,6 @@ declare global {
 
 const App: React.FC = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
- 
-  console.log("import mode:", import.meta.env.MODE)
-  console.log("Environment:", import.meta.env);
-  console.log("Google Maps API Key:", apiKey);
    
   return (
     <div className="min-h-screen bg-gray-50">
