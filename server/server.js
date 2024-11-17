@@ -1,6 +1,7 @@
 const express = require("express");
-const dotenv = require("dotenv");
 const cors = require("cors");
+const morgan = require("morgan");
+const mongoose = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(morgan('tiny'));
 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {
-       app.listen(port, host , () => {
+       app.listen(process.env.PORT, process.env.HOST , () => {
          console.log('Server is running on port', process.env.PORT);
      });
 })
@@ -21,8 +22,3 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 app.use("/users", userRoutes);
-
-app.listen(5001, () => {
-   console.log("Server started on port 5001")
-   console.log(process.env.PORT)
-})
