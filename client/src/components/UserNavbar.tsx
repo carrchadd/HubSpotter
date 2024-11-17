@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom"
 import HubSpotterLogo from '../assets/hubspotter.png'
 
 const UserNavbar = () => {
+
   return (
     <div className="bg-background">
         <div className="py-7 ">
