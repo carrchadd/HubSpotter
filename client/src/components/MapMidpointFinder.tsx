@@ -11,7 +11,6 @@ import { Loader } from '@googlemaps/js-api-loader';
 
 interface MapMidpointFinderProps {
   apiKey: string;
-  
 }
 
 const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
@@ -146,7 +145,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
         console.error('Error during geocoding:', error);
       }
     };
- 
 
     const loader = new Loader({
       apiKey: apiKey,
@@ -164,90 +162,144 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       setPlaces([]);
       return;
     }
-  
-    const fetchPlaces = () => {
+
+    const fetchPlaces = async () => {
       const service = new google.maps.places.PlacesService(document.createElement('div'));
-  
-      const types: string[] = [];
-      if (filters.restaurants) types.push('restaurant');
-      if (filters.entertainment) types.push('movie_theater', 'night_club');
-      if (filters.parks) types.push('park');
-      if (filters.shopping) types.push('shopping_mall');
-      if (filters.kidFriendly) types.push('amusement_park', 'zoo');
-  
-      if (types.length === 0) {
+
+      // Expanded typesMap with comprehensive designations
+      const typesMap: { [key in keyof Filters]?: string[] } = {
+        restaurants: ['bar', 'cafe', 'restaurant', 'winery'],
+        entertainment: [
+          'art_gallery',
+          'casino',
+          'movie_theater',
+          'museum',
+          'theater',
+          'tourist_attraction',
+          'point_of_interest',
+        ],
+        parks: [
+          'park',
+          'beach',
+          'golf_course',
+          'natural_feature',
+          'zoo',
+          'sports_complex',
+          'amusement_park',
+          'hiking_trail',
+          'stadium',
+          'boat_rental',
+          'marina',
+          'boat_launch',
+        ],
+        shopping: ['shopping_mall', 'store', 'boutique', 'supermarket'],
+        kidFriendly: ['amusement_park', 'zoo', 'playground', 'child_care'],
+      };
+
+      const selectedTypes: string[] = [];
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && typesMap[key as keyof Filters]) {
+          selectedTypes.push(...typesMap[key as keyof Filters]!);
+        }
+      });
+
+      if (selectedTypes.length === 0) {
         setPlaces([]);
         return;
       }
-  
-      const request: google.maps.places.PlaceSearchRequest = {
-        location: center,
-        radius: radius * 1000,
-        type: types.length === 1 ? types[0] : undefined,
-        keyword: types.length > 1 ? types.join(' ') : undefined,
-      };
-  
-      service.nearbySearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          // Fetch detailed information for each place
-          const detailedPlacesPromises = results.map(
-            (place) =>
-              new Promise<google.maps.places.PlaceResult | null>((resolve) => {
-                if (!place.place_id) {
-                  resolve(null);
-                  return;
-                }
-                service.getDetails(
-                  {
-                    placeId: place.place_id,
-                    fields: [
-                      'name',
-                      'formatted_address',
-                      'formatted_phone_number',
-                      'website',
-                      'geometry',
-                      'rating',
-                      'icon',
-                      'photos',
-                    ],
-                  },
-                  (details, status) => {
-                    if (
-                      status === google.maps.places.PlacesServiceStatus.OK &&
-                      details
-                    ) {
-                      resolve(details);
-                    } else {
-                      console.error(
-                        `Failed to get place details for ${place.place_id}:`,
-                        status
-                      );
-                      resolve(null);
-                    }
-                  }
-                );
-              })
-          );
-  
-          Promise.all(detailedPlacesPromises).then((detailedPlaces) => {
-            const validPlaces = detailedPlaces.filter(
-              (place): place is google.maps.places.PlaceResult => place !== null
-            );
-            setPlaces(validPlaces);
+
+      try {
+        // Perform separate searches for each type in parallel
+        const searchPromises = selectedTypes.map((type) => {
+          const request: google.maps.places.PlaceSearchRequest = {
+            location: center,
+            radius: radius * 1000,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            type: type as any, // Type assertion because 'type' can only be one string
+          };
+          return new Promise<google.maps.places.PlaceResult[]>((resolve) => {
+            service.nearbySearch(request, (results, status) => {
+              if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                resolve(results);
+              } else {
+                console.error(`Places search failed for type "${type}" due to`, status);
+                resolve([]);
+              }
+            });
           });
-        } else {
-          console.error('Places search failed due to', status);
-          setPlaces([]);
-        }
-      });
+        });
+
+        const allResults = await Promise.all(searchPromises);
+        const allPlaces: google.maps.places.PlaceResult[] = allResults.flat();
+
+        // Deduplicate places by place_id
+        const uniquePlacesMap: { [placeId: string]: google.maps.places.PlaceResult } = {};
+        allPlaces.forEach((place) => {
+          if (place.place_id && !uniquePlacesMap[place.place_id]) {
+            uniquePlacesMap[place.place_id] = place;
+          }
+        });
+
+        const uniquePlaces = Object.values(uniquePlacesMap);
+
+        // Fetch detailed information for each unique place
+        const detailedPlacesPromises = uniquePlaces.map(
+          (place) =>
+            new Promise<google.maps.places.PlaceResult | null>((resolve) => {
+              if (!place.place_id) {
+                resolve(null);
+                return;
+              }
+              service.getDetails(
+                {
+                  placeId: place.place_id,
+                  fields: [
+                    'name',
+                    'formatted_address',
+                    'formatted_phone_number',
+                    'website',
+                    'geometry',
+                    'rating',
+                    'icon',
+                    'photos',
+                  ],
+                },
+                (details, status) => {
+                  if (
+                    status === google.maps.places.PlacesServiceStatus.OK &&
+                    details
+                  ) {
+                    resolve(details);
+                  } else {
+                    console.error(
+                      `Failed to get place details for ${place.place_id}:`,
+                      status
+                    );
+                    resolve(null);
+                  }
+                }
+              );
+            })
+        );
+
+        const detailedPlaces = await Promise.all(detailedPlacesPromises);
+        const validPlaces = detailedPlaces.filter(
+          (place): place is google.maps.places.PlaceResult => place !== null
+        );
+
+        setPlaces(validPlaces);
+      } catch (error) {
+        console.error('Error fetching places:', error);
+        setPlaces([]);
+      }
     };
-  
+
     fetchPlaces();
   }, [center, radius, filters]);
 
   return (
     <div className="mx-auto max-w-[90%]">
-      <div className="mx-auto min-w-[90%] h-[650px] mb-10 rounded-[5px] overflow-hidden">
+      <div className="mx-auto min-w-[90%] min-w-6xl h-[650px] mb-10 rounded-[5px] overflow-hidden">
         <MapComponent
           apiKey={apiKey}
           markers={markers}
@@ -279,7 +331,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
               {addresses.map((address, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-2 rounded"
+                  className="flex items-center justify-between p-2 rounded bg-white shadow"
                 >
                   <span>{address}</span>
                   <Button
@@ -333,54 +385,53 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
 
       {/* Places List Section */}
       {places.length > 0 && (
-  <div className="mt-8 max-w-6xl mx-auto">
-    <h2 className="lg:text-2xl text-xl text-white text-center font-semibold mb-4">Places to Meet</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {places.map((place, index) => (
-        <div key={index} className="border p-4 rounded-[3px] shadow-md flex items-start bg-gray-100">
-          {/* Left Side: Place Info */}
-          <div className="flex-grow pr-4">
-            <h3 className="text-lg font-semibold">{place.name || "No Name Available"}</h3>
-            <p>{place.formatted_address || place.vicinity || "No Address Available"}</p>
-            {place.formatted_phone_number ? (
-              <p>📞 Phone: {place.formatted_phone_number}</p>
-            ) : (
-              <p>📞 Phone: Not Available</p>
-            )}
-            {place.website ? (
-              <p>
-                🌐 Website: <a href={place.website} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }} onMouseOver={(e) => e.currentTarget.style.color = 'blue'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>{new URL(place.website).hostname}</a>
-              </p>
-            ) : (
-              <p>🌐 Website: Not Available</p>
-            )}
-            {place.rating !== undefined && <p>⭐ Rating: {place.rating}</p>}
-          </div>
+        <div className="mt-8 max-w-6xl mx-auto">
+          <h2 className="lg:text-2xl text-xl text-gray-800 text-center font-semibold mb-4">Places to Meet</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {places.map((place, index) => (
+              <div key={index} className="border p-4 rounded-[3px] shadow-md flex items-start bg-white">
+                {/* Left Side: Place Info */}
+                <div className="flex-grow pr-4">
+                  <h3 className="text-lg font-semibold">{place.name || "No Name Available"}</h3>
+                  <p>{place.formatted_address || place.vicinity || "No Address Available"}</p>
+                  {place.formatted_phone_number ? (
+                    <p>📞 Phone: {place.formatted_phone_number}</p>
+                  ) : (
+                    <p>📞 Phone: Not Available</p>
+                  )}
+                  {place.website ? (
+                    <p>
+                      🌐 Website: <a href={place.website} target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">{new URL(place.website).hostname}</a>
+                    </p>
+                  ) : (
+                    <p>🌐 Website: Not Available</p>
+                  )}
+                  {place.rating !== undefined && <p>⭐ Rating: {place.rating}</p>}
+                </div>
 
-          {/* Right Side: Image(s) */}
-          <div className="w-1/3 flex flex-col items-center">
-            {place.icon && (
-              <img src={place.icon} alt="Place Icon" className="w-6 h-6 mb-2" />
-            )}
-            {place.photos && place.photos.length > 0 && (
-              <div className="grid gap-2">
-                {place.photos.slice(0, 1).map((photo, idx) => (
-                  <img
-                    key={idx}
-                    src={photo.getUrl({ maxWidth: 300, maxHeight: 300 })}
-                    alt={`Place ${idx + 1}`}
-                    className="w-full h-auto rounded-md"
-                  />
-                ))}
+                {/* Right Side: Image(s) */}
+                <div className="w-1/3 flex flex-col items-center">
+                  {place.icon && (
+                    <img src={place.icon} alt="Place Icon" className="w-6 h-6 mb-2" />
+                  )}
+                  {place.photos && place.photos.length > 0 && (
+                    <div className="grid gap-2">
+                      {place.photos.slice(0, 1).map((photo, idx) => (
+                        <img
+                          key={idx}
+                          src={photo.getUrl({ maxWidth: 300, maxHeight: 300 })}
+                          alt={`Place ${idx + 1}`}
+                          className="w-full h-auto rounded-md"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-  </div>
-)}
-
+      )}
     </div>
   );
 };

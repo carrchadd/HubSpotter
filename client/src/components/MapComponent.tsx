@@ -58,8 +58,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
         position,
         map: mapRef.current!,
         icon: {
-          url: 'https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_blackO.png', // Different icon for addresses
-          scaledSize: new google.maps.Size(20, 30),
+          url: 'https://cdn-icons-png.flaticon.com/128/3177/3177361.png', // Different icon for addresses
+          scaledSize: new google.maps.Size(25, 25),
         },
       });
       addressMarkersRef.current.push(marker);
@@ -76,8 +76,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           position: place.geometry.location,
           map: mapRef.current!,
           icon: {
-            url: 'https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_red.png', // Different icon for places
-            scaledSize: new google.maps.Size(20, 25),
+            url: 'https://cdn-icons-png.flaticon.com/128/2776/2776000.png', // Different icon for places
+            scaledSize: new google.maps.Size(25, 25),
           },
         });
 
