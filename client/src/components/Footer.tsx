@@ -23,7 +23,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-            <p className='lg:text-lg text-center font-nunito my-2'>We value your input and would love to hear your thoughts—share your feedback with us <NavLink to={"/feedback"} className="text-accent underline">here!</NavLink></p>
+            <p className='lg:text-lg text-center font-nunito my-2'>We value your input and would love to hear your thoughts—share your feedback with us <NavLink to={"/feedback"} className="text-[#40C4AA] underline">here!</NavLink></p>
             <div className='text-center'>
                 <h1 className="text-white text-lg font-nunito">© 2024 HubSpotter All Rights Reserved</h1>
                 <div className='mx-auto my-3 flex md:w-[50%] justify-center items-center gap-10'>

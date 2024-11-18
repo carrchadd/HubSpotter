@@ -16,7 +16,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
        < UserNavbar/>
-      <main className="py-6">
+      <main className="pt-4 pb-8">
         <MapMidpointFinder apiKey={apiKey} />
       </main>
     </div>

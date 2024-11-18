@@ -5,7 +5,7 @@ const UserNavbar = () => {
 
   return (
     <div className="bg-background">
-        <div className="py-7 ">
+        <div className="pt-3">
             <div className="flex justify-between items-center max-w-[1240px] mx-auto px-5 text-gray-400 lg:text-xl text-lg font-light font-raleway">
                 <NavLink to={"/"} >
                     <img src={HubSpotterLogo} alt="logo" className='h-32' />

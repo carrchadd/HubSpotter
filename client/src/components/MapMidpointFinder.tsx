@@ -246,8 +246,8 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
   }, [center, radius, filters]);
 
   return (
-    <div className="mx-auto max-w-[95%]">
-      <div className="w-full h-[650px] mb-10 rounded-[5px] overflow-hidden">
+    <div className="mx-auto max-w-[90%]">
+      <div className="mx-auto min-w-[90%] h-[650px] mb-10 rounded-[5px] overflow-hidden">
         <MapComponent
           apiKey={apiKey}
           markers={markers}
