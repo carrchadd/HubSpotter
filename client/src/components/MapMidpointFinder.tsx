@@ -386,7 +386,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       {/* Places List Section */}
       {places.length > 0 && (
         <div className="mt-8 max-w-6xl mx-auto">
-          <h2 className="lg:text-2xl text-xl text-gray-800 text-center font-semibold mb-4">Places to Meet</h2>
+          <h2 className="lg:text-2xl text-xl text-white text-center font-semibold mb-4">Places to Meet</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {places.map((place, index) => (
               <div key={index} className="border p-4 rounded-[3px] shadow-md flex items-start bg-white">
