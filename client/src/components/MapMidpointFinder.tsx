@@ -164,55 +164,76 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       setPlaces([]);
       return;
     }
-
+  
     const fetchPlaces = () => {
       const service = new google.maps.places.PlacesService(document.createElement('div'));
-    
+  
       const types: string[] = [];
       if (filters.restaurants) types.push('restaurant');
       if (filters.entertainment) types.push('movie_theater', 'night_club');
       if (filters.parks) types.push('park');
       if (filters.shopping) types.push('shopping_mall');
       if (filters.kidFriendly) types.push('amusement_park', 'zoo');
-    
+  
       if (types.length === 0) {
         setPlaces([]);
         return;
       }
-    
+  
       const request: google.maps.places.PlaceSearchRequest = {
         location: center,
         radius: radius * 1000,
-        
+        type: types.length === 1 ? types[0] : undefined,
+        keyword: types.length > 1 ? types.join(' ') : undefined,
       };
-    
+  
       service.nearbySearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          // Create an array to hold the enriched place details
-          const detailedPlaces: google.maps.places.PlaceResult[] = [];
-    
-          // Loop through each result and fetch detailed information
-          results.forEach((place) => {
-            if (place.place_id) {
-              service.getDetails(
-                {
-                  placeId: place.place_id,
-                  fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'geometry', 'rating', 'icon', 'photos'],
-                },
-                (details, status) => {
-                  if (status === google.maps.places.PlacesServiceStatus.OK && details) {
-                    detailedPlaces.push(details);
-    
-                    // Set the detailed places only once all are retrieved
-                    if (detailedPlaces.length === results.length) {
-                      setPlaces(detailedPlaces);
-                    }
-                  } else {
-                    console.error(`Failed to get place details for ${place.place_id}:`, status);
-                  }
+          // Fetch detailed information for each place
+          const detailedPlacesPromises = results.map(
+            (place) =>
+              new Promise<google.maps.places.PlaceResult | null>((resolve) => {
+                if (!place.place_id) {
+                  resolve(null);
+                  return;
                 }
-              );
-            }
+                service.getDetails(
+                  {
+                    placeId: place.place_id,
+                    fields: [
+                      'name',
+                      'formatted_address',
+                      'formatted_phone_number',
+                      'website',
+                      'geometry',
+                      'rating',
+                      'icon',
+                      'photos',
+                    ],
+                  },
+                  (details, status) => {
+                    if (
+                      status === google.maps.places.PlacesServiceStatus.OK &&
+                      details
+                    ) {
+                      resolve(details);
+                    } else {
+                      console.error(
+                        `Failed to get place details for ${place.place_id}:`,
+                        status
+                      );
+                      resolve(null);
+                    }
+                  }
+                );
+              })
+          );
+  
+          Promise.all(detailedPlacesPromises).then((detailedPlaces) => {
+            const validPlaces = detailedPlaces.filter(
+              (place): place is google.maps.places.PlaceResult => place !== null
+            );
+            setPlaces(validPlaces);
           });
         } else {
           console.error('Places search failed due to', status);
@@ -220,7 +241,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
         }
       });
     };
-
+  
     fetchPlaces();
   }, [center, radius, filters]);
 
@@ -343,10 +364,10 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
             )}
             {place.photos && place.photos.length > 0 && (
               <div className="grid gap-2">
-                {place.photos.slice(0, 3).map((photo, idx) => (
+                {place.photos.slice(0, 1).map((photo, idx) => (
                   <img
                     key={idx}
-                    src={photo.getUrl({ maxWidth: 100, maxHeight: 100 })}
+                    src={photo.getUrl({ maxWidth: 300, maxHeight: 300 })}
                     alt={`Place ${idx + 1}`}
                     className="w-full h-auto rounded-md"
                   />
