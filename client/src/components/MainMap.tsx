@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
    
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
        < UserNavbar/>
       <main className="py-6">
         <MapMidpointFinder apiKey={apiKey} />

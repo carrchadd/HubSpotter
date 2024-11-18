@@ -8,8 +8,8 @@ import { NavLink } from "react-router-dom";
 const Footer = () => {
   return (
     
-    <div className="py-20 text-white bg-background">
-        <div className='max-w-[1100px] mx-auto flex flex-col gap-20'>
+    <div className="py-14 text-white bg-background">
+        <div className='max-w-[1100px] mx-auto flex flex-col gap-10'>
             <div>
                 <div className='grid lg:grid-cols-3 lg:gap-0 gap-5 mx-auto'>
                     <div className='lg:col-span-2 text-center'>
@@ -23,13 +23,14 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
+            <p className='lg:text-lg text-center font-nunito my-2'>We value your input and would love to hear your thoughts—share your feedback with us <NavLink to={"/feedback"} className="text-accent underline">here!</NavLink></p>
             <div className='text-center'>
                 <h1 className="text-white text-lg font-nunito">© 2024 HubSpotter All Rights Reserved</h1>
-                <div className='mx-auto my-2 flex md:w-[50%] justify-center items-center gap-10'>
+                <div className='mx-auto my-3 flex md:w-[50%] justify-center items-center gap-10'>
                     <a href="https://github.com/carrchadd/HubSpotter"><FaGithubSquare size={30}/></a>
                     <a href="mailto:ccarreon@charlotte.edu?subject=HubSpotter%20Customer%20Contact"><IoIosMail size={32}/></a>
                 </div>
-                <div className='flex md:w-[50%] mx-auto justify-center items-center gap-10 mt-10 font-nunito lg:text-xl'>
+                <div className='flex md:w-[50%] mx-auto justify-center items-center gap-10 my-5 font-nunito lg:text-xl'>
                     <NavLink to={"/about"} >About</NavLink>
                     <NavLink to={"/contact"}>Contact</NavLink>
                 </div>
