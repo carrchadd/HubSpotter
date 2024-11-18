@@ -12,9 +12,8 @@ import SignUp from './components/SignUp';
 import About from './components/About';
 import User from './User';
 import MainMap from './components/MainMap';
-
-
 import { Contact } from './components/Contact';
+import Feedback from './components/Feedback';
 
 const router = createBrowserRouter([
   {
@@ -50,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         element: <Contact />
+      },
+      {
+        path: "/feedback",
+        element: <Feedback />
       }
     ],
   }
