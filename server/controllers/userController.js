@@ -1,4 +1,4 @@
-const userModel = require("../models/userModel");
+const User = require("../models/userModel");
 
 // login user
 exports.loginUser = async (req, res) => {
@@ -7,7 +7,7 @@ exports.loginUser = async (req, res) => {
 
 // signup user
 exports.signupUser = async (req, res) => {
-    let user = new userModel(req.body);
+    let user = new User(req.body);
     user.save()
     .then ( () => {
         res.json({ message: "User signed up" });
