@@ -15,8 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import Footer from "@/components/Footer";
-
 type UserProfile = {
   name: string;
   email: string;
@@ -78,7 +76,7 @@ const EditProfileForm = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name" className="text-white">Name</Label>
           <Input
             id="name"
             value={formData.name}
@@ -90,7 +88,7 @@ const EditProfileForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
+          <Label htmlFor="address" className="text-white">Address</Label>
           <Input
             id="address"
             value={formData.address}
@@ -114,14 +112,14 @@ const EditProfileForm = ({
           type="button"
           variant="outline"
           onClick={onCancel}
-          className="border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="border-slate-700 text-slate-700 hover:bg-slate-800 hover:text-white rounded-[5px]"
           disabled={isSaving}
         >
           Cancel
         </Button>
         <Button 
           type="submit"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          className="bg-emerald-600 hover:bg-emerald-900 text-white rounded-[5px]"
           disabled={isSaving}
         >
           {isSaving ? "Saving..." : "Save Changes"}
@@ -202,7 +200,7 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900">
+    <div className="min-h-[calc(100vh-140px)] flex flex-col bg-background">
      
       
       {updateSuccess && (
@@ -217,22 +215,22 @@ const Profile: React.FC = () => {
         </div>
       )}
       
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Profile Card */}
-          <Card className="bg-emerald-900/20 border-emerald-800">
+          <Card className="bg-emerald-900/40 border-emerald-800 rounded-[5px]">
             <CardHeader className="text-center">
               <Avatar className="w-24 h-24 mx-auto mb-4 bg-emerald-700">
                 <span className="text-2xl font-semibold text-emerald-100">
                   {user.name.charAt(0)}
                 </span>
               </Avatar>
-              <h2 className="text-xl font-semibold text-slate-100">{user.name}</h2>
-              <p className="text-sm text-slate-400">{user.email}</p>
+              <h2 className="text-xl font-semibold text-slate-100 font-raleway">{user.name}</h2>
+              <p className="text-sm text-slate-400 font-nunito">{user.email}</p>
             </CardHeader>
-            <CardContent className="text-slate-300">
-              <p className="text-sm mt-2">{user.address}</p>
-              <p className="text-sm text-slate-400 mt-2">
+            <CardContent className="text-slate-300 text-center">
+              <p className="text-sm mt-2 font-librefranklin">{user.address}</p>
+              <p className="text-sm text-slate-400 mt-2 font-librefranklin">
                 Member Since: {user.memberSince}
               </p>
             </CardContent>
@@ -241,7 +239,7 @@ const Profile: React.FC = () => {
                 <DialogTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="w-full border-emerald-700 text-emerald-100 hover:bg-emerald-800/20"
+                    className="max-w-[50%] mx-auto rounded-[5px] border-emerald-600 text-black hover:bg-emerald-600 hover:text-white"
                   >
                     Edit Profile
                   </Button>
@@ -262,15 +260,15 @@ const Profile: React.FC = () => {
 
           {/* Saved Locations section remains the same... */}
           <div className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 text-slate-100">
+            <h2 className="text-xl font-semibold font-raleway text-slate-100">
               Saved Locations
             </h2>
-            <Separator className="mb-6 bg-slate-700" />
+            <Separator className="mb-6 mt-1 bg-slate-700" />
             <div className="space-y-4">
               {savedLocations.map((location) => (
                 <Card 
                   key={location.id} 
-                  className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors"
+                  className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors rounded-[5px]"
                 >
                   <CardContent className="flex items-center p-4">
                     <div className="w-20 h-20 bg-slate-700 rounded-lg mr-4 flex-shrink-0 flex items-center justify-center">
@@ -279,11 +277,11 @@ const Profile: React.FC = () => {
                       </span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-100">
+                      <h3 className="text-lg font-semibold text-slate-100 font-raleway">
                         {location.name}
                       </h3>
-                      <p className="text-sm text-slate-400">{location.address}</p>
-                      <p className="text-sm text-amber-400 mt-1">
+                      <p className="text-sm text-slate-400 font-nunito">{location.address}</p>
+                      <p className="text-sm text-amber-400 mt-1 font-nunito">
                         {"★".repeat(location.rating)}
                         {"☆".repeat(5 - location.rating)}
                       </p>
@@ -296,7 +294,6 @@ const Profile: React.FC = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };
