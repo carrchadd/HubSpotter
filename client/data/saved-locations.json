@@ -1,0 +1,15 @@
+[
+    {
+      "id": 1,
+      "name": "Brewery",
+      "address": "1194 N Tryon St, Charlotte, NC 28213",
+      "rating": 5
+    },
+    {
+      "id": 2,
+      "name": "Cafe",
+      "address": "324 W Trade St, Charlotte, NC 28202",
+      "rating": 4
+    }
+  ]
+  

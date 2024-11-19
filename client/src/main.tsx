@@ -14,6 +14,7 @@ import User from './User';
 import MainMap from './components/MainMap';
 import { Contact } from './components/Contact';
 import Feedback from './components/Feedback';
+import Profile from './components/Profile';
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: "/feedback",
         element: <Feedback />
+      },
+      {
+        path: "/profile",
+        element: <Profile />
       }
     ],
   }

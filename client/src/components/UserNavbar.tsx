@@ -25,6 +25,13 @@ const UserNavbar = () => {
                   >
                     <p>Log In</p>
                   </NavLink>
+                  <NavLink to={"/profile"} 
+                    className={({ isActive}) =>
+                      isActive ? "text-white font-normal" : ""
+                   }
+                  >
+                    <p>Profile</p>
+                  </NavLink>
                 </div>
             </div>
         </div>
