@@ -19,6 +19,11 @@ describe('Inserting user document into MongoDB', () => {
     await connection.close();
   });
 
+  afterEach(async () => {
+    const users = db.collection('users');
+    await users.deleteOne({_id: 'some-user-id'});
+  });
+
   it('should insert a doc into collection', async () => {
     const users = db.collection('users');
 
@@ -29,6 +34,7 @@ describe('Inserting user document into MongoDB', () => {
         email: 'j123@gmail.com',
         password: 'john123',
     };
+    
     await users.insertOne(mockUser);
 
     const insertedUser = await users.findOne({_id: 'some-user-id'});
