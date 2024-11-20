@@ -6,7 +6,8 @@ const userSchema = new Schema({
     firstName: { type: String, required: [true, 'cannot be empty'] },
     username: { type: String, required: [true, 'cannot be empty'] },
     email: { type: String, required: [true, 'cannot be empty'] , unique: true},
-    password: { type: String, required: [true, 'cannot be empty'] }
+    password: { type: String, required: [true, 'cannot be empty'] },
+    savedLocations: [{ type: Schema.Types.ObjectId, ref: 'Location' }]
 });
 
 // checl if the password is modified

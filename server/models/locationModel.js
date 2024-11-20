@@ -1,10 +1,5 @@
 const mongoose = require('mongoose');
 const locationSchema = new mongoose.Schema({
-    id: {
-      type: Number,
-      required: true,
-      unique: true
-    },
     name: {
       type: String,
       required: true,
@@ -35,5 +30,5 @@ const locationSchema = new mongoose.Schema({
     }
   });
   
-  // Create the model
-  const Location = mongoose.model('Location', locationSchema);
+
+module.exports = mongoose.model('Location', locationSchema);
