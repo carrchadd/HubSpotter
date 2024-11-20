@@ -1,5 +1,6 @@
 // MapMidpointFinder.tsx
 import React, { useState, useEffect } from 'react';
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -297,6 +298,23 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     fetchPlaces();
   }, [center, radius, filters]);
 
+
+  const [likedPlaces, setLikedPlaces] = useState<Set<string>>(new Set());
+  const handleLikePlace = (index: number) => {
+    console.log('Toggling like for index:', index);
+  
+    setLikedPlaces((prev) => {
+      const newLiked = new Set(prev);
+      if (newLiked.has(index.toString())) {
+        newLiked.delete(index.toString());
+      } else {
+        newLiked.add(index.toString());
+      }
+      return newLiked;
+    });
+  };
+  
+
   return (
     <div className="mx-auto max-w-[90%]">
       <div className="mx-auto min-w-[90%] min-w-6xl h-[650px] mb-10 rounded-[5px] overflow-hidden">
@@ -389,7 +407,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           <h2 className="lg:text-2xl text-xl text-white text-center font-semibold mb-4">Places to Meet</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {places.map((place, index) => (
-              <div key={index} className="border p-4 rounded-[3px] shadow-md flex items-start bg-white">
+              <div key={index} className="border p-4 rounded-[3px] shadow-md flex items-start bg-white relative">
                 {/* Left Side: Place Info */}
                 <div className="flex-grow pr-4">
                   <h3 className="text-lg font-semibold">{place.name || "No Name Available"}</h3>
@@ -415,7 +433,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
                     <img src={place.icon} alt="Place Icon" className="w-6 h-6 mb-2" />
                   )}
                   {place.photos && place.photos.length > 0 && (
-                    <div className="grid gap-2">
+                    <div className="grid gap-2 pt-4" >
                       {place.photos.slice(0, 1).map((photo, idx) => (
                         <img
                           key={idx}
@@ -427,7 +445,17 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
                     </div>
                   )}
                 </div>
-              </div>
+                <div
+            className="absolute top-2 right-2 hover:bg-gray-100 p-2 cursor-pointer rounded-full"
+            onClick={() => handleLikePlace(index)}
+          >
+            {likedPlaces.has(index.toString()) ? (
+              <AiFillHeart size={30} className="text-red-500" />
+            ) : (
+              <AiOutlineHeart size={30} className="text-gray-500 hover:text-red-500" />
+            )}
+          </div>
+                  </div>
             ))}
           </div>
         </div>
