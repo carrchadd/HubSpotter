@@ -37,6 +37,7 @@ jobs:
       env:
         MONGO_URI: ${{ secrets.MONGO_URI }}
         PORT: ${{ secrets.PORT }}
+        DBNAME: ${{ secrets.DBNAME }}
       run: |
         cd server
         npm ci
