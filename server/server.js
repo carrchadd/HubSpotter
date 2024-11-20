@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 // routes
 const userRoutes = require("./routes/userRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
+const locationRoutes = require("./routes/locationRoutes");
 
 const app = express();
 
@@ -26,3 +27,4 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use("/users", userRoutes);
 app.use("/feedback", feedbackRoutes);
+app.use("/location", locationRoutes);
