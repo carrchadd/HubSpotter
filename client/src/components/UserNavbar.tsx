@@ -1,7 +1,10 @@
 import { NavLink } from "react-router-dom"
 import HubSpotterLogo from '../assets/hubspotter.png'
+import { useState } from "react"
 
 const UserNavbar = () => {
+
+  const [isSignedIn, setIsSignedIn] = useState(true);
 
   return (
     <div className="bg-background">
@@ -18,20 +21,22 @@ const UserNavbar = () => {
                   >
                     <p>Find a location</p>
                   </NavLink>
-                  <NavLink to={"/login"} 
+                  {isSignedIn ? 
+                  <NavLink to={"/profile"} 
+                      className={({ isActive}) =>
+                        isActive ? "text-white font-normal" : ""
+                     }
+                    >
+                      <p>Profile</p>
+                    </NavLink> 
+                    : 
+                    <NavLink to={"/login"} 
                     className={({ isActive}) =>
                       isActive ? "text-white font-normal" : ""
                    }
                   >
                     <p>Log In</p>
-                  </NavLink>
-                  <NavLink to={"/profile"} 
-                    className={({ isActive}) =>
-                      isActive ? "text-white font-normal" : ""
-                   }
-                  >
-                    <p>Profile</p>
-                  </NavLink>
+                  </NavLink>}
                 </div>
             </div>
         </div>
