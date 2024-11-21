@@ -13,10 +13,9 @@ import { X } from "lucide-react";
 const SignUp = () => {
 
     const [name, setName] = useState("");
-    const [userName, setUsername] = useState("")
     const [email, setEmail] = useState("");
-    const [defaultLocation, setDefaultLocation] = useState("");
     const [password, setPassword] = useState("");
+    const [defaultLocation, setDefaultLocation] = useState("");
     const [signUpSuccess, setSignUpSuccess] = useState(false);
     const navigate = useNavigate();
 
@@ -68,14 +67,6 @@ const SignUp = () => {
                                 type="text"
                                 placeholder="Name" 
                                 onChange={(e) => setName(e.target.value)}
-                                className="rounded-[7px]" />
-                            <FaUser className="absolute sm:translate-x-28 translate-x-16"/>
-                        </div>
-                        <div className="flex justify-center items-center">
-                            <Input 
-                                type="text"
-                                placeholder="Username" 
-                                onChange={(e) => setUsername(e.target.value)}
                                 className="rounded-[7px]" />
                             <FaUser className="absolute sm:translate-x-28 translate-x-16"/>
                         </div>
