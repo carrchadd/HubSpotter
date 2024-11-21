@@ -36,6 +36,7 @@ const LogIn = () => {
         const data = await response.json();
         console.log(data);
         if (response.status === 201 && response.ok) {
+            localStorage.setItem("authToken", data.token);
             setLogInSuccess(true);
             setIsNavigating(true);
             setTimeout(() => {
