@@ -1,33 +1,15 @@
 const User = require("../models/userModel");
 const jwt = require('jsonwebtoken');
-const { DateTime } = require('luxon');
 
-const createToken = (id) => {
-    return jwt.sign({ id }, process.env.SECRET, { expiresIn: 60 * 60 * 24 });
+const createToken = () => {
+    return jwt.sign({ id: this._id }, process.env.SECRET, { expiresIn: 60 * 60 * 24 });
 }
-
-// signup user
-exports.signupUser = async (req, res) => {
-    const user = new User(req.body);
-    user.save()
-    .then ((savedUser) => {
-        // create the token
-        console.log("new user id: ", savedUser._id);
-        const token = createToken(savedUser._id);
-        res.status(201).json({
-            message: "User successfully created",
-            token});
-    }
-    )
-    .catch(err => {
-        res.status(400).json({ message: err.message});
-    })
-};
 
 // login user
 exports.loginUser = async (req, res) => {
     const username = req.body.userName;
     const password = req.body.password;
+    console.log(username);
     User.findOne({userName: username})
     .then(user => {
         
@@ -38,8 +20,8 @@ exports.loginUser = async (req, res) => {
                 // user has been authenticated
                 if(result) {
                     // add login logic here
-                    console.log("user sign in id: ",user._id);
                     const token = createToken(user._id);
+                    console.log("user successfully logged in");
                     res.status(201).json({message: "Successfully log in", token});
                 } else {
                     res.json({ message: "Incorrect credentials" });
@@ -53,25 +35,22 @@ exports.loginUser = async (req, res) => {
     .catch(err => console.log(err.message));
 };
 
-exports.profile = async (req, res) => {
-
-    if (!req.user || !req.user.id) {
-        console.log("User ID not found in request");
-        return res.status(400).json({ message: "User not found" });
+// signup user
+exports.signupUser = async (req, res) => {
+    const user = new User(req.body);
+    user.save()
+    .then ((savedUser) => {
+        console.log(savedUser._id);
+        // create the token
+        const token = createToken(savedUser._id);
+        res.status(201).json({message: "User successfully created", token});
     }
-    const userId = req.user.id;
-    const { _id, name, email, defaultLocation, createdAt, savedLocations,  } = await User.findById(userId).populate('savedLocations');
-    let date = DateTime.fromISO((createdAt).toISOString().substring(0, 23)).toFormat("MMMM d, yyyy");
-    res.json({ 
-        _id, 
-        name, 
-        email, 
-        date,
-        defaultLocation, 
-        savedLocations, 
-    });
+    )
+    .catch(err => {
+        res.status(400).json({ message: err.message});
+    })
+};
 
-}
 
 // logout user
 exports.logout =  async (req, res) => {

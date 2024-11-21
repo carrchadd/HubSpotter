@@ -26,7 +26,7 @@ const locationSchema = new mongoose.Schema({
       type: String,
       required: false,
       trim: true,
-      match: /^(www\.)?([\w\-]+)\.([a-z]{2,6})(\/[\w\-]*)*\/?$/ // Basic URL validation
+      match: /^(https?:\/\/)?([\w\-]+)\.([a-z]{2,6})(\/[\w\-]*)*\/?$/ // Basic URL validation
     }
   });
   
