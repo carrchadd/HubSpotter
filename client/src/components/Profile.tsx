@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,8 +19,8 @@ import { Label } from "@/components/ui/label";
 type UserProfile = {
   name: string;
   email: string;
-  address: string;
-  memberSince: string;
+  defaultLocation: string;
+  date: string;
 };
 
 type SavedLocation = {
@@ -27,6 +28,8 @@ type SavedLocation = {
   name: string;
   address: string;
   rating: number;
+  phone: string;
+  website: string;
 };
 
 // Edit Profile Form Component
@@ -41,7 +44,7 @@ const EditProfileForm = ({
 }) => {
   const [formData, setFormData] = useState({
     name: user.name,
-    address: user.address,
+    address: user.defaultLocation,
   });
   
   const [isSaving, setIsSaving] = useState(false);
@@ -57,11 +60,11 @@ const EditProfileForm = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Here you would typically make an API call to update the user data
-      // await fetch('/api/user/update', {
-      //   method: 'PUT',
-      //   body: JSON.stringify(formData),
-      //   headers: { 'Content-Type': 'application/json' },
-      // });
+      await fetch('/api/user/update', {
+        method: 'PUT',
+        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+      });
       
       onSave(formData);
     } catch (err: unknown) {
@@ -144,20 +147,33 @@ const Profile: React.FC = () => {
         setError(null);
         
         //change to db api call
-        const [userResponse, locationsResponse] = await Promise.all([
-          fetch('/data/user.json'),
-          fetch('/data/saved-locations.json')
-        ]);
+        const response = await fetch('http://localhost:4040/users/profile', {
+          method: 'GET',
+          headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+              'Content-Type': 'application/json',
+          },
+        });
 
-        if (!userResponse.ok || !locationsResponse.ok) {
+        if (!response) {
           throw new Error("Failed to fetch data");
         }
 
-        const userData = await userResponse.json();
-        const locationsData = await locationsResponse.json();
+        const userData = await response.json();
+
+        console.log(userData);
+
+        // const [userResponse, locationsResponse] = await Promise.all([
+        //   fetch('/data/user.json'),
+        //   fetch('/data/saved-locations.json')
+        // ]);
+
+        // if (!userResponse.ok || !locationsResponse.ok) {
+        //   throw new Error("Failed to fetch data");
+        // }
 
         setUser(userData);
-        setSavedLocations(locationsData);
+        setSavedLocations(userData.savedLocations);
       } catch (error) {
         console.error("Error:", error);
         setError("Failed to load profile data");
@@ -229,9 +245,9 @@ const Profile: React.FC = () => {
               <p className="text-sm text-slate-400 font-nunito">{user.email}</p>
             </CardHeader>
             <CardContent className="text-slate-300 text-center">
-              <p className="text-sm mt-2 font-librefranklin">{user.address}</p>
+              <p className="text-sm mt-2 font-librefranklin">{user.defaultLocation}</p>
               <p className="text-sm text-slate-400 mt-2 font-librefranklin">
-                Member Since: {user.memberSince}
+                Member Since: {user.date}
               </p>
             </CardContent>
             <CardFooter>
@@ -264,32 +280,36 @@ const Profile: React.FC = () => {
               Saved Locations
             </h2>
             <Separator className="mb-6 mt-1 bg-slate-700" />
-            <div className="space-y-4">
-              {savedLocations.map((location) => (
-                <Card 
-                  key={location.id} 
-                  className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors rounded-[5px]"
-                >
-                  <CardContent className="flex items-center p-4">
-                    <div className="w-20 h-20 bg-slate-700 rounded-lg mr-4 flex-shrink-0 flex items-center justify-center">
-                      <span className="text-2xl text-slate-400">
-                        {location.name.charAt(0)}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-100 font-raleway">
-                        {location.name}
-                      </h3>
-                      <p className="text-sm text-slate-400 font-nunito">{location.address}</p>
-                      <p className="text-sm text-amber-400 mt-1 font-nunito">
-                        {"★".repeat(location.rating)}
-                        {"☆".repeat(5 - location.rating)}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <ScrollArea className="h-[400px] w-full rounded-[5px] border">
+              <div className="space-y-4 p-4">
+                {savedLocations.map((location) => (
+                  <Card 
+                    key={location.id} 
+                    className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors rounded-[5px]"
+                  >
+                    <CardContent className="flex items-center p-4">
+                      <div className="w-20 h-20 bg-slate-700 rounded-lg mr-4 flex-shrink-0 flex items-center justify-center">
+                        <span className="text-2xl text-slate-400">
+                          {location.name.charAt(0)}
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-100 font-raleway">
+                          {location.name}
+                        </h3>
+                        <p className="text-sm text-slate-400 font-nunito">{location.address}</p>
+                        <p className="text-md text-green-400 font-nunito ">{location.phone}</p>
+                        <p className="text-sm text-slate-300 font-nunito">{location.website}</p>
+                        <p className="text-sm text-amber-400 mt-1 font-nunito">
+                          {"★".repeat(location.rating)}
+                          {"☆".repeat(5 - location.rating)}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </main>
