@@ -24,7 +24,6 @@ mongoose.connect(process.env.MONGO_URI)
 })
 .catch(err => console.log(err.message))
 
-
 app.use("/users", userRoutes);
 app.use("/feedback", feedbackRoutes);
 app.use("/location", locationRoutes);
