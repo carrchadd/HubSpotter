@@ -5,8 +5,8 @@ const bcrypt = require('bcrypt');
 const userSchema = new Schema({
     name: { type: String, required: [true, 'cannot be empty'] },
     email: { type: String, required: [true, 'cannot be empty'] , unique: true},
-    defaultLocation: { type: String},
     password: { type: String, required: [true, 'cannot be empty'] },
+    defaultLocation: { type: String},
     savedLocations: [{ type: Schema.Types.ObjectId, ref: 'Location' }]
 }, {timestamps: {createdAt: true, updatedAt: false}});
 
