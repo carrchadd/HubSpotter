@@ -14,7 +14,7 @@ import { X } from "lucide-react";
 
 const LogIn = () => {
 
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [logInSuccess, setLogInSuccess] = useState(false);
     const [isNavigating, setIsNavigating] = useState(false);
@@ -29,16 +29,18 @@ const LogIn = () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username,
+                email,
                 password
             })
         })
-        if (response.status === 200) {
+        const data = await response.json();
+        console.log(data);
+        if (response.status === 201 && response.ok) {
             setLogInSuccess(true);
             setIsNavigating(true);
             setTimeout(() => {
                 navigate('/profile');
-            }, 2000);
+            }, 1500);
         }
     }
 
@@ -60,15 +62,15 @@ const LogIn = () => {
         )}
 
         <div className="flex justify-center items-center pb-14">
-            <div className="px-16 bg-accent pt-11 pb-32 rounded-[5px]">
+            <div className="px-16 bg-accent pt-11 pb-16 rounded-[5px]">
                 <form className="flex flex-col" onSubmit={authenticateUser}>
                     <div className="flex flex-col mx-auto gap-6 w-full">
                         <h1 className="lg:text-3xl text-2xl mb-5 text-white font-raleway font-semibold">Sign In</h1>
                         <div className="flex justify-center items-center">
                             <Input 
-                                type="text"
-                                placeholder="Username" 
-                                onChange={(e) => setUsername(e.target.value)}
+                                type="email"
+                                placeholder="Email" 
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="rounded-[7px]" />
                             <FaUser className="absolute sm:translate-x-28 translate-x-16"/>
                         </div>

@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
 const userSchema = new Schema({
-    firstName: { type: String, required: [true, 'cannot be empty'] },
-    userName: { type: String, required: [true, 'cannot be empty'] },
+    name: { type: String, required: [true, 'cannot be empty'] },
     email: { type: String, required: [true, 'cannot be empty'] , unique: true},
+    defaultLocation: { type: String},
     password: { type: String, required: [true, 'cannot be empty'] },
     savedLocations: [{ type: Schema.Types.ObjectId, ref: 'Location' }]
-});
+}, {timestamps: {createdAt: true, updatedAt: false}});
 
 // checl if the password is modified
 userSchema.pre('save', function(next) {

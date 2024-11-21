@@ -15,6 +15,7 @@ import MainMap from './components/MainMap';
 import { Contact } from './components/Contact';
 import Feedback from './components/Feedback';
 import Profile from './components/Profile';
+import { AuthContextProvider } from './context/AuthContext';
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthContextProvider>
+      <RouterProvider router={router} />
+    </AuthContextProvider>
   </StrictMode>,
 )
