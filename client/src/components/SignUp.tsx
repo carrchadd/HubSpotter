@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 const SignUp = () => {
 
     const [firstName, setFirstName] = useState("");
-    const [username, setUsername] = useState("")
+    const [userName, setUsername] = useState("")
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ const SignUp = () => {
             },
             body: JSON.stringify({
                 firstName,
-                username,
+                userName,
                 email,
                 password
             })
