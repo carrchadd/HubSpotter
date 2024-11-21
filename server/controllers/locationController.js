@@ -1,4 +1,5 @@
 const location = require('../models/locationModel');
+const User = require('../models/userModel');
 
 // save a location and save it to user
 exports.saveLocation = async (req, res) => {
@@ -6,11 +7,11 @@ exports.saveLocation = async (req, res) => {
     loc.save()
     .then( () => {
         try {
-            const userId = req.body.userId; // change once JWT auth is finished
+            const userId = req.user.id; // change once JWT auth is finished
             const user = User.findById(userId)
-            .then( () => {
-                user.savedLocations.push(loc._id);
-                user.save()
+            .then( foundUser => {
+                foundUser.savedLocations.push(loc._id);
+                foundUser.save()
                 .then( () => {
                     res.json({ message: "Location saved and added to user" });
                 })

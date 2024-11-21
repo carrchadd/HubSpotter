@@ -4,16 +4,19 @@ import { Button } from "./ui/button";
 import { FaGithubSquare } from "react-icons/fa";
 import { SiMinutemailer } from "react-icons/si";
 import { IoIosMail } from "react-icons/io";
+import { FaLocationArrow } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import {useState} from 'react'
 import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 
 const SignUp = () => {
 
-    const [firstName, setFirstName] = useState("");
-    const [userName, setUsername] = useState("")
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [defaultLocation, setDefaultLocation] = useState("");
+    const [signUpSuccess, setSignUpSuccess] = useState(false);
     const navigate = useNavigate();
 
     const createUser = async (e: React.FormEvent) => {
@@ -24,47 +27,63 @@ const SignUp = () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                firstName,
-                userName,
+                name,
+                defaultLocation,
                 email,
                 password
             })
         })
-        if (response.status === 200) {
-            alert('Account Created Successfully')
-            navigate('/login');
+        const data = await response.json();
+        console.log(data);
+        if (response.status === 201 && response.ok) {
+            console.log(response);
+            setSignUpSuccess(true);
+            setTimeout(() => navigate('/login'), 1000);
         }
     }
 
   return (
     <div className="w-full bg-background">
-        <div className="flex justify-center items-center pb-14">
-            <div className="px-16 bg-accent pt-11 pb-32 rounded-[5px]">
+        
+        {signUpSuccess && (
+            <div className="fixed top-4 right-4 bg-emerald-500 text-white px-7 py-4 rounded-md shadow-lg flex items-center z-10">
+                <span>Sign Up Success</span>
+                <button 
+                    onClick={() => setSignUpSuccess(false)}
+                    className="ml-2 hover:text-emerald-100"
+                >
+                    <X size={16} />
+                </button>
+            </div>
+        )}
+
+        <div className="flex justify-center items-center">
+            <div className="px-16 bg-accent py-11 rounded-[5px]">
                 <form className="flex flex-col" onSubmit={createUser}>
                     <div className="flex flex-col mx-auto gap-6">
                         <h1 className="lg:text-3xl text-2xl mb-5 text-white font-raleway font-semibold sm:px-7 lg:px-1">Create an Account</h1>
                         <div className="flex justify-center items-center">
                             <Input 
                                 type="text"
-                                placeholder="First name" 
-                                onChange={(e) => setFirstName(e.target.value)}
+                                placeholder="Name" 
+                                onChange={(e) => setName(e.target.value)}
                                 className="rounded-[7px]" />
                             <FaUser className="absolute sm:translate-x-28 translate-x-16"/>
                         </div>
                         <div className="flex justify-center items-center">
                             <Input 
                                 type="text"
-                                placeholder="Username" 
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="rounded-[7px]" />
-                            <FaUser className="absolute sm:translate-x-28 translate-x-16"/>
+                                placeholder="Address" 
+                                onChange={(e) => setDefaultLocation(e.target.value)}
+                                className="rounded-[7px] pr-10" />
+                            <FaLocationArrow className="absolute sm:translate-x-28 translate-x-16"/>
                         </div>
                         <div className="flex justify-center items-center">
                             <Input 
                                 type="email"
                                 placeholder="Email"
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="rounded-[7px]" />
+                                className="rounded-[7px] pr-10" />
                             <SiMinutemailer className="absolute sm:translate-x-28 translate-x-16" size={22}/>
                         </div>
                         <div className="flex justify-center items-center">
