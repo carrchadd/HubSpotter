@@ -57,8 +57,6 @@ const EditProfileForm = ({
 
     try {
       
-      
-      // Here you would typically make an API call to update the user data
       await fetch('/api/user/update', {
         method: 'PUT',
         body: JSON.stringify(formData),
@@ -260,7 +258,6 @@ const handleRemoveLocation = async (locationId: string) => {
             <CardHeader className="text-center">
               <Avatar className="w-24 h-24 mx-auto mb-4 bg-emerald-700">
                 <span className="text-2xl font-semibold text-emerald-100">
-                  {user.name.charAt(0)}
                 </span>
               </Avatar>
               <h2 className="text-xl font-semibold text-slate-100 font-raleway">{user.name}</h2>
