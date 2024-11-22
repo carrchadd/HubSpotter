@@ -26,9 +26,9 @@ exports.signupUser = async (req, res) => {
 
 // login user
 exports.loginUser = async (req, res) => {
-    const username = req.body.userName;
+    const email = req.body.email;
     const password = req.body.password;
-    User.findOne({userName: username})
+    User.findOne({email: email})
     .then(user => {
         
         // check if the user exists

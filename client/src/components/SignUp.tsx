@@ -6,41 +6,35 @@ import { SiMinutemailer } from "react-icons/si";
 import { IoIosMail } from "react-icons/io";
 import { FaLocationArrow } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-import {useState} from 'react'
+import {useState, useContext} from 'react'
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { AuthContext } from './AuthContext';
 
 const SignUp = () => {
-
+    const { login } = useContext(AuthContext);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [defaultLocation, setDefaultLocation] = useState("");
     const [signUpSuccess, setSignUpSuccess] = useState(false);
     const navigate = useNavigate();
+    
 
     const createUser = async (e: React.FormEvent) => {
-        e.preventDefault()
-        const response = await fetch ('http://localhost:4040/users/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                name,
-                defaultLocation,
-                email,
-                password
-            })
-        })
+        e.preventDefault();
+        const response = await fetch('http://localhost:4040/users/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, defaultLocation, email, password }),
+        });
         const data = await response.json();
-        console.log(data);
         if (response.status === 201 && response.ok) {
-            console.log(response);
-            setSignUpSuccess(true);
-            setTimeout(() => navigate('/login'), 1000);
+          login(data.token); // Log the user in
+          setSignUpSuccess(true);
+          setTimeout(() => navigate('/profile'), 1000);
         }
-    }
+      };
 
   return (
     <div className="w-full bg-background">

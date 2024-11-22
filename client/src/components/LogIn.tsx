@@ -1,49 +1,39 @@
-import { Input } from "./ui/input"
-import { FaUser, FaLock } from "react-icons/fa";
-import { Button } from "./ui/button";
-import { FaGithubSquare } from "react-icons/fa";
-import { IoIosMail } from "react-icons/io";
-import { NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { X } from "lucide-react";
-
-
-
-//test comment
+// LogIn.tsx
+import { Input } from './ui/input';
+import { FaUser, FaLock } from 'react-icons/fa';
+import { Button } from './ui/button';
+import { FaGithubSquare } from 'react-icons/fa';
+import { IoIosMail } from 'react-icons/io';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { X } from 'lucide-react';
+import { AuthContext } from './AuthContext';
 
 const LogIn = () => {
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [logInSuccess, setLogInSuccess] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigate = useNavigate();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [logInSuccess, setLogInSuccess] = useState(false);
-    const [isNavigating, setIsNavigating] = useState(false);
-    const navigate = useNavigate();
-
-
-    const authenticateUser = async (e: React.FormEvent) => {
-        e.preventDefault()
-        const response = await fetch ('http://localhost:4040/users/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email,
-                password
-            })
-        })
-        const data = await response.json();
-        console.log(data);
-        if (response.status === 201 && response.ok) {
-            localStorage.setItem("authToken", data.token);
-            setLogInSuccess(true);
-            setIsNavigating(true);
-            setTimeout(() => {
-                navigate('/profile');
-            }, 1500);
-        }
+  const authenticateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const response = await fetch('http://localhost:4040/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+    if (response.status === 201 && response.ok) {
+      login(data.token); // Update the context
+      setLogInSuccess(true);
+      setIsNavigating(true);
+      setTimeout(() => {
+        navigate('/profile');
+      }, 1500);
     }
+  };
 
 
   return (

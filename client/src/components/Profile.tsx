@@ -56,8 +56,7 @@ const EditProfileForm = ({
     setError(null);
 
     try {
-      // Simulate API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       
       // Here you would typically make an API call to update the user data
       await fetch('/api/user/update', {

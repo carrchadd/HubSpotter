@@ -7,12 +7,16 @@ const mongoose = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const locationRoutes = require("./routes/locationRoutes");
+const allowedOrigin = 'http://localhost:5173';
 
 const app = express();
 
 require('dotenv').config();
 
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigin,
+  credentials: true, // Allow cookies to be sent
+}));
 app.use(express.json());
 app.use(morgan('tiny'));
 
