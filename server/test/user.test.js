@@ -17,6 +17,7 @@ describe('Inserting user document into MongoDB', () => {
     });
     db = connection.db(process.env.DBNAME);
 
+    const users = db.collection('users');
     await users.deleteOne({_id: 'some-user-id'});
   });
 
