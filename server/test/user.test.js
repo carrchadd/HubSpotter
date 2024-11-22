@@ -15,7 +15,9 @@ describe('Inserting user document into MongoDB', () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    db = await connection.db(process.env.DBNAME);
+    db = connection.db(process.env.DBNAME);
+
+    await users.deleteOne({_id: 'some-user-id'});
   });
 
   afterAll(async () => {
