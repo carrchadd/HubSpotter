@@ -12,7 +12,6 @@ exports.signupUser = async (req, res) => {
     user.save()
     .then ((savedUser) => {
         // create the token
-        console.log("new user id: ", savedUser._id);
         const token = createToken(savedUser._id);
         res.status(201).json({
             message: "User successfully created",
@@ -38,7 +37,6 @@ exports.loginUser = async (req, res) => {
                 // user has been authenticated
                 if(result) {
                     // add login logic here
-                    console.log("user sign in id: ",user._id);
                     const token = createToken(user._id);
                     res.status(201).json({message: "Successfully log in", token});
                 } else {
