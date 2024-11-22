@@ -50,6 +50,40 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    
+      const fetchUserAddress = async () => {
+
+        try {
+
+          const response = await fetch('http://localhost:4040/users/profile', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            }
+          })
+
+          if (!response) {
+            throw new Error("Failed to fetch data");
+          }
+
+          const data = await response.json();
+          console.log(data.defaultLocation);
+
+
+          setAddresses([data.defaultLocation]);
+
+        } catch (error) {
+        console.error("Error:", error);
+        } 
+      };
+      
+        fetchUserAddress();
+
+  }, []);
+
+  useEffect(() => {
     if (addresses.length === 0) {
       setMarkers([]);
       setCenter(undefined);

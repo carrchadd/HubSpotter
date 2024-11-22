@@ -31,7 +31,7 @@ const LogIn = () => {
       setIsNavigating(true);
       setTimeout(() => {
         navigate('/profile');
-      }, 1500);
+      }, 1000);
     }
   };
 
