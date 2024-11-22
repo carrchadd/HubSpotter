@@ -24,7 +24,7 @@ type UserProfile = {
 };
 
 type SavedLocation = {
-  id: number;
+  _id: string;
   name: string;
   address: string;
   rating: number;
@@ -213,6 +213,29 @@ const Profile: React.FC = () => {
       </div>
     );
   }
+const handleRemoveLocation = async (locationId: string) => {
+  try {
+    // Send DELETE request to server
+    const response = await fetch(`http://localhost:4040/location/${locationId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to remove location");
+    }
+
+    // Update UI by removing location from state
+    setSavedLocations((prev) => prev.filter((loc) => loc._id !== locationId));
+  } catch (error) {
+    console.error("Error removing location:", error);
+  }
+};
+
+  
 
   return (
     <div className="min-h-[calc(100vh-140px)] flex flex-col bg-background">
@@ -283,29 +306,35 @@ const Profile: React.FC = () => {
               <div className="space-y-4 p-4">
                 {savedLocations.map((location) => (
                   <Card 
-                    key={location.id} 
-                    className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors rounded-[5px]"
+                  key={location._id} 
+                  className="relative bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors rounded-[5px]"
+                >
+                  <button
+                    onClick={() => handleRemoveLocation(location._id)}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 focus:outline-none"
                   >
-                    <CardContent className="flex items-center p-4">
-                      <div className="w-20 h-20 bg-slate-700 rounded-lg mr-4 flex-shrink-0 flex items-center justify-center">
-                        <span className="text-2xl text-slate-400">
-                          {location.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-slate-100 font-raleway">
-                          {location.name}
-                        </h3>
-                        <p className="text-sm text-slate-400 font-nunito">{location.address}</p>
-                        <p className="text-md text-green-400 font-nunito ">{location.phone}</p>
-                        <p className="text-sm text-slate-300 font-nunito">{location.website}</p>
-                        <p className="text-sm text-amber-400 mt-1 font-nunito">
-                          {"★".repeat(location.rating)}
-                          {"☆".repeat(5 - location.rating)}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <X size={30} />
+                  </button>
+                  <CardContent className="flex items-center p-4">
+                    <div className="w-20 h-20 bg-slate-700 rounded-lg mr-4 flex-shrink-0 flex items-center justify-center">
+                      <span className="text-2xl text-slate-400">
+                        {location.name.charAt(0)}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-100 font-raleway">
+                        {location.name}
+                      </h3>
+                      <p className="text-sm text-slate-400 font-nunito">{location.address}</p>
+                      <p className="text-md text-green-400 font-nunito">{location.phone}</p>
+                      <p className="text-sm text-slate-300 font-nunito">{location.website}</p>
+                      <p className="text-sm text-amber-400 mt-1 font-nunito">
+                        {"★".repeat(location.rating)}
+                        {"☆".repeat(5 - location.rating)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
                 ))}
               </div>
             </ScrollArea>

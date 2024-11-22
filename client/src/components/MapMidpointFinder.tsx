@@ -28,6 +28,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     kidFriendly: false,
   });
   const [places, setPlaces] = useState<google.maps.places.PlaceResult[]>([]);
+  const [likedPlaces, setLikedPlaces] = useState<Set<string>>(new Set());
 
   const handleAddAddress = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -167,7 +168,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     const fetchPlaces = async () => {
       const service = new google.maps.places.PlacesService(document.createElement('div'));
 
-      // Expanded typesMap with comprehensive designations
       const typesMap: { [key in keyof Filters]?: string[] } = {
         restaurants: ['bar', 'cafe', 'restaurant', 'winery'],
         entertainment: [
@@ -177,7 +177,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           'museum',
           'theater',
           'tourist_attraction',
-          'point_of_interest',
+          
         ],
         parks: [
           'park',
@@ -193,8 +193,8 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           'marina',
           'boat_launch',
         ],
-        shopping: ['shopping_mall', 'store', 'boutique', 'supermarket'],
-        kidFriendly: ['amusement_park', 'zoo', 'playground', 'child_care'],
+        shopping: ['shopping_mall', 'boutique'],
+        kidFriendly: ['amusement_park', 'zoo', 'playground'],
       };
 
       const selectedTypes: string[] = [];
@@ -210,13 +210,12 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       }
 
       try {
-        // Perform separate searches for each type in parallel
         const searchPromises = selectedTypes.map((type) => {
           const request: google.maps.places.PlaceSearchRequest = {
             location: center,
             radius: radius * 1000,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            type: type as any, // Type assertion because 'type' can only be one string
+            type: type as any,
           };
           return new Promise<google.maps.places.PlaceResult[]>((resolve) => {
             service.nearbySearch(request, (results, status) => {
@@ -233,7 +232,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
         const allResults = await Promise.all(searchPromises);
         const allPlaces: google.maps.places.PlaceResult[] = allResults.flat();
 
-        // Deduplicate places by place_id
         const uniquePlacesMap: { [placeId: string]: google.maps.places.PlaceResult } = {};
         allPlaces.forEach((place) => {
           if (place.place_id && !uniquePlacesMap[place.place_id]) {
@@ -243,7 +241,6 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
 
         const uniquePlaces = Object.values(uniquePlacesMap);
 
-        // Fetch detailed information for each unique place
         const detailedPlacesPromises = uniquePlaces.map(
           (place) =>
             new Promise<google.maps.places.PlaceResult | null>((resolve) => {
@@ -263,6 +260,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
                     'rating',
                     'icon',
                     'photos',
+                    'place_id',
                   ],
                 },
                 (details, status) => {
@@ -298,22 +296,130 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
     fetchPlaces();
   }, [center, radius, filters]);
 
+  // Helper function to save location to the database
+  const saveLocation = async (place: google.maps.places.PlaceResult) => {
+    try {
+      const token = localStorage.getItem('authToken');
 
-  const [likedPlaces, setLikedPlaces] = useState<Set<string>>(new Set());
-  const handleLikePlace = (index: number) => {
-    console.log('Toggling like for index:', index);
-  
-    setLikedPlaces((prev) => {
-      const newLiked = new Set(prev);
-      if (newLiked.has(index.toString())) {
-        newLiked.delete(index.toString());
-      } else {
-        newLiked.add(index.toString());
+      // Construct the location data to match your backend model
+      const locationData = {
+        name: place.name,
+        address: place.formatted_address || place.vicinity,
+        rating: place.rating,
+        phone: place.formatted_phone_number || '',
+        website: place.website || '',
+        placeId: place.place_id,
+        // Add any other fields your backend requires
+      };
+
+      const response = await fetch('http://localhost:4040/location/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(locationData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save location');
       }
-      return newLiked;
-    });
+    } catch (error) {
+      console.error('Error saving location:', error);
+      throw error;
+    }
   };
-  
+
+  // Helper function to delete location from the database
+  const deleteLocation = async (placeId: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(`http://localhost:4040/location/placeId/${placeId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete location');
+      }
+    } catch (error) {
+      console.error('Error deleting location:', error);
+      throw error;
+    }
+  };
+
+  // Modified handleLikePlace function
+  const handleLikePlace = async (placeId: string, place: google.maps.places.PlaceResult) => {
+    console.log('Toggling like for placeId:', placeId);
+
+    if (likedPlaces.has(placeId)) {
+      // If the place is already liked, unliking it
+      try {
+        await deleteLocation(placeId);
+
+        setLikedPlaces((prev) => {
+          const newLiked = new Set(prev);
+          newLiked.delete(placeId);
+          return newLiked;
+        });
+      } catch (error) {
+        // Handle error (e.g., show notification)
+        console.error('Failed to unlike place:', error);
+      }
+    } else {
+      // If the place is not liked yet, liking it
+      try {
+        await saveLocation(place);
+
+        setLikedPlaces((prev) => {
+          const newLiked = new Set(prev);
+          newLiked.add(placeId);
+          return newLiked;
+        });
+      } catch (error) {
+        // Handle error (e.g., show notification)
+        console.error('Failed to like place:', error);
+      }
+    }
+  };
+
+  // Fetch user's liked places on component mount
+  useEffect(() => {
+    const fetchLikedPlaces = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+
+        const response = await fetch('http://localhost:4040/users/profile', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user profile');
+        }
+
+        const userData = await response.json();
+
+        // Assuming savedLocations is an array of location objects with a placeId field
+        const userLikedPlaces = new Set<string>(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          userData.savedLocations.map((location: any) => location.placeId)
+        );
+
+        setLikedPlaces(userLikedPlaces);
+      } catch (error) {
+        console.error('Error fetching liked places:', error);
+      }
+    };
+
+    fetchLikedPlaces();
+  }, []);
 
   return (
     <div className="mx-auto max-w-[90%]">
@@ -341,7 +447,9 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
                   placeholder="Enter address"
                   className="flex-grow rounded-[5px]"
                 />
-                <Button type="submit" className='rounded-[5px]'>Add</Button>
+                <Button type="submit" className="rounded-[5px]">
+                  Add
+                </Button>
               </div>
             </form>
 
@@ -365,7 +473,7 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
           </CardContent>
         </Card>
 
-        <Card className='rounded-[5px] bg-gray-100'>
+        <Card className="rounded-[5px] bg-gray-100">
           <CardContent className="p-4">
             <h3 className="font-medium mb-4">Filters</h3>
             <div className="space-y-4">
@@ -404,59 +512,82 @@ const MapMidpointFinder: React.FC<MapMidpointFinderProps> = ({ apiKey }) => {
       {/* Places List Section */}
       {places.length > 0 && (
         <div className="mt-8 max-w-6xl mx-auto">
-          <h2 className="lg:text-2xl text-xl text-white text-center font-semibold mb-4">Places to Meet</h2>
+          <h2 className="lg:text-2xl text-xl text-white text-center font-semibold mb-4">
+            Places to Meet
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {places.map((place, index) => (
-              <div key={index} className="border p-4 rounded-[3px] shadow-md flex items-start bg-white relative">
-                {/* Left Side: Place Info */}
-                <div className="flex-grow pr-4">
-                  <h3 className="text-lg font-semibold">{place.name || "No Name Available"}</h3>
-                  <p>{place.formatted_address || place.vicinity || "No Address Available"}</p>
-                  {place.formatted_phone_number ? (
-                    <p>📞 Phone: {place.formatted_phone_number}</p>
-                  ) : (
-                    <p>📞 Phone: Not Available</p>
-                  )}
-                  {place.website ? (
-                    <p>
-                      🌐 Website: <a href={place.website} target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">{new URL(place.website).hostname}</a>
-                    </p>
-                  ) : (
-                    <p>🌐 Website: Not Available</p>
-                  )}
-                  {place.rating !== undefined && <p>⭐ Rating: {place.rating}</p>}
-                </div>
+            {places.map((place, index) => {
+              const placeId = place.place_id || index.toString();
 
-                {/* Right Side: Image(s) */}
-                <div className="w-1/3 flex flex-col items-center">
-                  {place.icon && (
-                    <img src={place.icon} alt="Place Icon" className="w-6 h-6 mb-2" />
-                  )}
-                  {place.photos && place.photos.length > 0 && (
-                    <div className="grid gap-2 pt-4" >
-                      {place.photos.slice(0, 1).map((photo, idx) => (
-                        <img
-                          key={idx}
-                          src={photo.getUrl({ maxWidth: 300, maxHeight: 300 })}
-                          alt={`Place ${idx + 1}`}
-                          className="w-full h-auto rounded-md"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+              return (
                 <div
-            className="absolute top-2 right-2 hover:bg-gray-100 p-2 cursor-pointer rounded-full"
-            onClick={() => handleLikePlace(index)}
-          >
-            {likedPlaces.has(index.toString()) ? (
-              <AiFillHeart size={30} className="text-red-500" />
-            ) : (
-              <AiOutlineHeart size={30} className="text-gray-500 hover:text-red-500" />
-            )}
-          </div>
+                  key={placeId}
+                  className="border p-4 rounded-[3px] shadow-md flex items-start bg-white relative"
+                >
+                  {/* Left Side: Place Info */}
+                  <div className="flex-grow pr-4">
+                    <h3 className="text-lg font-semibold">
+                      {place.name || 'No Name Available'}
+                    </h3>
+                    <p>
+                      {place.formatted_address ||
+                        place.vicinity ||
+                        'No Address Available'}
+                    </p>
+                    {place.formatted_phone_number ? (
+                      <p>📞 Phone: {place.formatted_phone_number}</p>
+                    ) : (
+                      <p>📞 Phone: Not Available</p>
+                    )}
+                    {place.website ? (
+                      <p>
+                        🌐 Website:{' '}
+                        <a
+                          href={place.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-blue-500"
+                        >
+                          {new URL(place.website).hostname}
+                        </a>
+                      </p>
+                    ) : (
+                      <p>🌐 Website: Not Available</p>
+                    )}
+                    {place.rating !== undefined && <p>⭐ Rating: {place.rating}</p>}
                   </div>
-            ))}
+
+                  {/* Right Side: Image(s) */}
+                  <div className="w-1/3 flex flex-col items-center">
+                    {place.icon && (
+                      <img src={place.icon} alt="Place Icon" className="w-6 h-6 mb-2" />
+                    )}
+                    {place.photos && place.photos.length > 0 && (
+                      <div className="grid gap-2 pt-4">
+                        {place.photos.slice(0, 1).map((photo, idx) => (
+                          <img
+                            key={idx}
+                            src={photo.getUrl({ maxWidth: 300, maxHeight: 300 })}
+                            alt={`Place ${idx + 1}`}
+                            className="w-full h-auto rounded-md"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="absolute top-2 right-2 hover:bg-gray-100 p-2 cursor-pointer rounded-full"
+                    onClick={() => handleLikePlace(placeId, place)}
+                  >
+                    {likedPlaces.has(placeId) ? (
+                      <AiFillHeart size={30} className="text-red-500" />
+                    ) : (
+                      <AiOutlineHeart size={30} className="text-gray-500 hover:text-red-500" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
